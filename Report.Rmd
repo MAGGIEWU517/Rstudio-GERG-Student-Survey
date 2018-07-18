@@ -1,0 +1,286 @@
+---
+title: "Report"
+author: "Maggie"
+date: "July 16, 2018"
+output:
+  word_document: default
+  html_document: default
+---
+```{r, echo=FALSE, warning=FALSE}
+library(stringr)
+library(ggplot2)
+
+Data1 <- read.csv("Data1.csv")
+Data2 <- read.csv("Data2.csv")
+Items1 <- read.csv("ItemsID1.csv")
+Items2 <- read.csv("ItemsID2.csv")
+Data31<-read.csv("Data31.csv")
+Data32<-read.csv("Data32.csv")
+DataID3<-read.csv("DataID3.csv")
+
+
+sGGbar <- function(d,v,it) {
+  
+  attach(d)
+  stri=deparse(substitute(v))
+  label1 <- it$Value.Names[it$ColName==stri]
+  label1 = as.character(label1)
+  label1<-as.list(strsplit(label1, ";"))
+  label1<-unlist(label1)
+  length1=length(label1)
+
+  ns = " "
+  for (i in 1:length1) {
+     if(duplicated(label1)[i]==TRUE){
+      label1[i] = ns
+       ns = paste(" ", ns, sep=" ")
+    }
+  }
+  
+  argm =as.numeric(label1)
+  
+  if(anyNA(argm)){
+    argm = it$Values[it$ColName==stri]
+    argm = as.character(argm)
+    argm<-as.list(strsplit(argm, ","))
+    argm<-unlist(argm)
+    argm = as.numeric(argm)
+  }
+  
+  freq<-table(factor(v, levels = min(argm):max(argm)))
+  freq<-as.vector(freq)
+  DF <- data.frame(Frequency = freq,
+                  Values = gl(length1, 1, labels = label1))
+
+  head <- it$Stem[it$ColName==stri]
+  head<- as.character(head)
+  head <-paste0(strwrap(head, width=40), collapse="\n")
+  
+  gp<-ggplot(DF, aes(x = Values, y = Frequency)) +
+  xlab("") + ylab("Frequency") +
+  expand_limits(y = c(0, max(DF$Frequency)*1.1)) + 
+  geom_bar(stat = "identity", fill = "#56B4E9") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
+  geom_text(aes(label = sprintf("%.2f%%", Frequency/sum(Frequency) * 100)), 
+            vjust = -.5) +
+  labs(title=head)
+  print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
+  
+  detach(d)
+}
+
+sGGbar2 <- function(d,v,it) {
+  attach(d)
+  stri=deparse(substitute(v))
+  label1 <- it$Value.Names[it$ColName==stri]
+  label1 = as.character(label1)
+  label1<-as.list(strsplit(label1, ";"))
+  label1<-unlist(label1)
+  length1=length(label1)
+
+  ns = " "
+  for (i in 1:length1) {
+     if(duplicated(label1)[i]==TRUE){
+      label1[i] = ns
+       ns = paste(" ", ns, sep=" ")
+     }else{
+      label1=label1
+    }
+  }
+  
+  argm =as.numeric(label1)
+  
+  if(anyNA(argm)){
+    argm = it$Values[it$ColName==stri]
+    argm = as.character(argm)
+    argm<-as.list(strsplit(argm, ","))
+    argm<-unlist(argm)
+    argm = as.numeric(argm)
+  }
+  
+  freq<-table(factor(v, levels = min(argm):max(argm)))
+  freq<-as.vector(freq)
+  DF <- data.frame(Frequency = freq,
+                  Values = gl(length1, 1, labels = label1))
+
+  head <- it$Wording[it$ColName==stri]
+  head<- as.character(head)
+  head <-paste0(strwrap(head, width=50), collapse="\n")
+  
+  gp<-ggplot(DF, aes(x = Values, y = Frequency)) +
+  xlab("") + ylab("Frequency") +
+  expand_limits(y = c(0, max(DF$Frequency)*1.1)) + 
+  geom_bar(stat = "identity", fill = "#56B4E9") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
+  geom_text(aes(label = sprintf("%.2f%%", Frequency/sum(Frequency) * 100)), 
+            vjust = -.5) +
+  labs(title=head)
+  print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
+  detach(d)
+}
+
+sHIST <- function(d,v,it) {
+  attach(d)
+  m=round(mean(v, na.rm = TRUE),2)
+  m=toString(m)
+  sdt=round(sd(v, na.rm = TRUE),2)
+  sdt = toString(sdt)
+  mands=paste(c(m,sdt),collapse = "/")
+  ad <- paste(c("M(SD)", mands), collapse = "=")
+  
+  med = round(median(v, na.rm = TRUE),2)
+  med = toString(med)
+  ad2 <- paste(c("Med", med), collapse = "=")
+  
+  stri=deparse(substitute(v))
+  head <- it$Wording[it$ColName==stri]
+  head<- as.character(head)
+  head <-paste0(strwrap(c(head,ad,ad2), width=40), collapse="\n")
+  
+  
+  gp<-ggplot(data=d, aes(x = v)) +
+     geom_histogram(breaks=seq(0, 100, by = 10),
+                 col="#000000",
+                 fill="#56B4E9") +
+  labs(title = head) +
+  labs(x="0-100%", y="Frequency")
+
+  print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
+  detach(d)
+}
+
+
+```
+
+There are 294 and 289 valid data in the Survey 1 and Survey 2, respectively(Valid implies that data have been cleaned by eliminating testing, unfinished and duplicated data). Based on the data from survey 1, it's noticable that more than 70 percent students had 3 or more group exams before. Among those students who had group exams before, 88.94%(11.89%+22.13%+54.92%) voices about those past experiences are positive. 
+```{r, echo=FALSE, warning=FALSE}
+BN<-sGGbar(Data1, Before.N, Items1)
+BG<-sGGbar(Data1, Before.Good,Items1)
+```
+
+Looking at the formation groups, the two similar polts below indicate that more than 93% groups are formed by 3 students. Hence, to make some composite variables, I filter out any responses that don't have 3 members in their group. After this step, there are 242 and 280 observations keeped in Survey 1 and Survey2, respectively. In other words, 13 observations are removed from Survey 1 and 23 observations are removed from the Survey2.
+
+```{r, echo=FALSE, warning=FALSE}
+GN1<-sGGbar(Data1,G.N,Items1)
+GN2<-sGGbar(Data2,G.N,Items2)
+```
+
+##Preparation
+Comparing those two histograms about how students prepared before exams, similar distributions conclude that students did not prepared well with their groups. This may be because of the intense pace of summer terms. Hence, this report is created according to groups that are not well-organized. 
+```{r, echo=FALSE, warning=FALSE}
+Dis1<-sGGbar(Data1,Discuss,Items1)
+Dis2<-sGGbar(Data2,Discuss,Items2)
+```
+
+In addtion, through observing how students studies before exams, I found out that a large percent of students studies by their own. Then, it's interesting to look at how they studied with other students. To do this, I made a composite variables called Study_Others which summerizes the other 3 variables, "I studied with others (NONE were from my group-exam group)", "I studied with others (SOME were from my group-exam group)", "and I studied with others (ALL were from my group-exam group)". Specifially, I multiply the second Study variable ("I studied with others (NONE were from my group-exam group)") by 1, the third Study variable ("I studied with others (SOME were from my group-exam group)") by 2, and the forth Study variable (I studied with others (ALL were from my group-exam group)") by 3 so that this new variable range from 0 to 300. A simillar results of those two histogram indicates that most students did not learn with any group member in their teams. The Med of MT1 is 5 and it decreases to 0 at MT2. However, it's noticable that the small number of students who worked with their groups before the MT2 increases comparing to that of MT1.
+```{r, echo=FALSE, warning=FALSE}
+sHIST2 <- function(d,v,h,xl,br) {
+  attach(d)
+  m=round(mean(v, na.rm = TRUE),2)
+  m=toString(m)
+  sdt=round(sd(v, na.rm = TRUE),2)
+  sdt = toString(sdt)
+  mands=paste(c(m,sdt),collapse = "/")
+  ad <- paste(c("M(SD)", mands), collapse = "=")
+  
+  med = round(median(v, na.rm = TRUE),2)
+  med = toString(med)
+  ad2 <- paste(c("Med", med), collapse = "=")
+  
+  stri=deparse(substitute(v))
+  xls=deparse(substitute(xl))
+  head <- h
+  head <-paste0(strwrap(c(head,ad,ad2), width=50), collapse="\n")
+  
+  gp<-ggplot(data=d, aes(x = v)) +
+     geom_histogram(breaks=seq(0, xl, by = br),
+                 col="#000000",
+                 fill="#56B4E9") +
+  labs(title = head) +
+  labs(x=paste(c("0",xls),collapse = "-"), y="Frequency")
+
+  print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
+  detach(d)
+}
+```
+
+```{r, echo=FALSE, warning=FALSE}
+
+SO1<-sHIST2(Data31,Study_Other,"Composite Variable: Study with Others(MT1)",300,10)
+
+SO2<-sHIST2(Data32,Study_Other,"Composite Variable: Study with Others(MT2)",300,10)
+
+```
+
+##Participantion and Observation
+
+Observing the distribution of participantion in each groups, many students voted each team memeber with same contribution, 25%. This can be more obvious seen by the composite variable, Parti_Range which equals to the maximum score minus the minimum score. Large percent students decided to vote equal contribution for their teammate.
+```{r, echo=FALSE, warning=FALSE}
+Part1<-sHIST2(Data31,Parti_Range,"Composite Variable: Participant Range(MT1)",100,10)
+Part2<-sHIST2(Data32,Parti_Range,"Composite Variable: Participant Range(MT2)",100,10)
+```
+
+In my opinion, voting 25% for each participant is an ideal situation which should not occur frequently, there are two explanations for this situation. First, those students are satisfied with the group exam experience, so I look at the correlationship between voting range(Parti_Range) and satisfication("I would work with this group of people again.") for MT1 and MT2. The correlations are around -0.2 which indicates that there are some relationship between those two variables but the relation is not strong enough to explain this situation. Another explanation is that students tried to be kind for their teammates no matter they had a good experience with they or not. Then, I look at the correlation between voting range and students personality(composite variable: Self_Avg). It shows there is a small relationship between those two variables as well. Hence, I suggest to pursue more information for this aspect by adjusting research questions. 
+```{r}
+cor(DataID3$G.Exp3_3,DataID3$Parti_1_S1, use = "complete.obs")
+cor(DataID3$G.Exp2_5,DataID3$Parti_1_S2, use = "complete.obs")
+```
+
+In addition, I checked how students voted for their contributions in those two midterms, there is a 0.16 correlation shows up. I also checked how the voting range changes. The correlation is around 0.3. This means that students voted a little bit different in the second survey but some of them voted in the simillar way as they did in Survey 1.
+```{r}
+cor(DataID3$Parti_1_S1,DataID3$Parti_1_S2, use = "complete.obs")
+cor(DataID3$Parti_Range_S1,DataID3$Parti_Range_S2)
+```
+
+##Know
+
+To pursue how well did each student know about their group members, we built variables added up to 100 percent and students voted for each group member. For now, we are just curious about if participant has any friend in their team and if this would affect the contributions. Thus, I created a composite variable called Know_Avg which calculated the average score of familiarity degree. There is a significant increase from score of MT1 to score of MT2. This implies that students are more familiar with their teammember after MT1. 
+```{r, echo=FALSE, warning=FALSE}
+k1<-sHIST2(Data31,Know_Avg,"Composite Variable: Know_Avg(MT1)",6,1)
+k2<-sHIST2(Data32,Know_Avg,"Composite Variable: Know_Avg(MT2)",6,1)
+```
+
+
+By reading the comment of what will make students feel comforable and productive in the group exam, many students mentions the word "friend". They explained that they would work well with peopel that they are more familiar with such as friend. As we discussed above, students are more familiar with each other in MT2. There is a significant correlation change here as well. In midterm 1, the correlation between Parti_Range and Know_Avg is around -0.03. In midterm 2, this correlation increased to -0.06 which is doubled. This tigter correlation demonstrated that contribution and familiarity is tightly related with each other. 
+```{r}
+cor(DataID3$Know_Avg_S1,DataID3$Know_Avg_S2, use = "complete.obs")
+cor(DataID3$Know_Avg_S1,DataID3$Parti_Range_S1, use = "complete.obs")
+cor(DataID3$Know_Avg_S2,DataID3$Parti_Range_S2, use = "complete.obs")
+```
+
+##Dicision makeing
+
+The dicision variable, Decide_4("We chose the answer of the person or people who were most confident for that question"), represents the condition that students did not fairly contribute in the group exams. To look at the decision making process, I ignored this variable and made a composite variable, Decide.Disc, for the other 3 conditions. It equals Decide_1*1+Decide_2*2+Decide_3*3 and ranges from 0 to 300.
+
+Since those two histograms are skewing to left and having mean 212.54 and 199, respectively. It is reasonable to say that most groups are making decisions by voting (most agreed) on an answer with some discussion(Decide_2) or reaching consensus (all agreed) through discussion(Decide_3).
+```{r, echo=FALSE, warning=FALSE}
+
+D1<-sHIST2(Data31,Decide_Disc,"Composite Variable: Dicision(MT1)",300,10)
+
+D2<-sHIST2(Data32,Decide_Disc,"Composite Variable: Dicision(MT2)",300,10)
+
+```
+
+##Group Exams Experiences
+To look at the experiences of group exams, I calculated the average score of the 10 variables for those two surveys(G.Exp.Avg_S1 = Average(Exp1_1+Exp1_2+Exp1_3+Exp2_1+Exp2_2+Exp2_3+(7-Exp2_4)+(7-Exp3_1)+(7-Exp3_2)+Exp3_3) and G.Exp.Avg_S2 = Average(Exp1_1+Exp1_2+Exp1_3+Exp2_1+Exp2_2+Exp2_3+(7-Exp2_4)+Exp2_5+Exp3_4+Exp3_5+Exp3_7+Exp3_8)). We can see the distributions below. It's important that the average skew to 6 in MT2 with increased mean and median. This demonstrates that the more positive voice about the group exam experience appear in MT2.
+```{r, echo=FALSE, warning=FALSE}
+
+
+GE1<-sHIST2(Data31,G.Exp_Avg,"Composite Variable: Group Experience Average(MT1)",7,1)
+GE2<-sHIST2(Data32,G.Exp_Avg,"Composite Variable: Group Experience Average(MT2)",7,1)
+```
+
+To search what cause this change, I use a regression model which invloves the mean difference, G.Exp.MD, of those two group exam experiences. This regression model below shows that how well students know their group members ad how group members participated in exams significantlly affect the changes of group exam experiences. 
+```{r, warning=FALSE}
+KnowDifference<-DataID3$Know_Avg_S1-DataID3$Know_Avg_S2
+ParticipantRangeDifference<-DataID3$Parti_Range_S1-DataID3$Parti_Range_S2
+PaceDifference<-DataID3$Pace_S1-DataID3$Pace_S2
+model1 <- lm(DataID3$G.Exp.MD~KnowDifference+ParticipantRangeDifference+PaceDifference, DataID3)
+summary(model1)
+```
+
+##Future Difference
+Future.Diff (Mid-Final) is a variables that look at how many students don't want include group exams in the finals. This distribution shows that small portion of students don't want to include groups exams in the Final. 
+```{r, echo=FALSE, warning=FALSE}
+Fd<-sHIST2(Data31,Future_diff,"Composite Variable: Future Difference",1,0.1)
+```

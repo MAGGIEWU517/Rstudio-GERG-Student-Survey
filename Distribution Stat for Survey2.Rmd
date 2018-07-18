@@ -1,0 +1,281 @@
+---
+title: "Descriptive Stat for GREG Student Survey 2"
+author: "Maggie Wu"
+date: "June 25, 2018"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r, echo=FALSE, warning=FALSE}
+
+
+Data2 <- read.csv("Data2.csv")
+Items2<- read.csv("Items2.csv")
+
+library(stringr)
+library(ggplot2)
+attach(Data2)
+
+
+
+sGGbar <- function(v) {
+  
+  stri=deparse(substitute(v))
+  label1 <- Items2$Value.Names[Items2$ColName==stri]
+  label1 = as.character(label1)
+  label1<-as.list(strsplit(label1, ";"))
+  label1<-unlist(label1)
+  length1=length(label1)
+
+  ns = " "
+  for (i in 1:length1) {
+     if(duplicated(label1)[i]==TRUE){
+      label1[i] = ns
+       ns = paste(" ", ns, collapse = "")
+     }
+  }
+  
+  argm =as.numeric(label1)
+  
+  if(anyNA(argm)){
+    argm = Items2$Values[Items2$ColName==stri]
+    argm = as.character(argm)
+    argm<-as.list(strsplit(argm, ","))
+    argm<-unlist(argm)
+    argm = as.numeric(argm)
+  }
+  
+  
+  
+  
+  freq<-table(factor(v, levels = min(argm):max(argm)))
+  freq<-as.vector(freq)
+  DF <- data.frame(Frequency = freq,
+                  Values = gl(length1, 1, labels = label1))
+
+  head <- Items2$Stem[Items2$ColName==stri]
+  head<- as.character(head)
+  head <-paste0(strwrap(head, width=40), collapse="\n")
+  
+  gp<-ggplot(DF, aes(x = Values, y = Frequency)) +
+  xlab("") + ylab("Frequency") +
+  expand_limits(y = c(0, max(DF$Frequency)*1.1)) + 
+  geom_bar(stat = "identity", fill = "#56B4E9") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
+  geom_text(aes(label = sprintf("%.2f%%", Frequency/sum(Frequency) * 100)), 
+            vjust = -.5) +
+  labs(title=head)
+  print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
+}
+
+sGGbar2 <- function(v) {
+  
+  stri=deparse(substitute(v))
+  label1 <- Items2$Value.Names[Items2$ColName==stri]
+  label1 = as.character(label1)
+  label1<-as.list(strsplit(label1, ";"))
+  label1<-unlist(label1)
+  length1=length(label1)
+
+  ns = " "
+  for (i in 1:length1) {
+     if(duplicated(label1)[i]==TRUE){
+      label1[i] = ns
+       ns = paste(" ", ns, sep=" ")
+    }
+  }
+  
+  argm =as.numeric(label1)
+  
+  if(anyNA(argm)){
+    argm = Items2$Values[Items2$ColName==stri]
+    argm = as.character(argm)
+    argm<-as.list(strsplit(argm, ","))
+    argm<-unlist(argm)
+    argm = as.numeric(argm)
+  }
+  
+  freq<-table(factor(v, levels = min(argm):max(argm)))
+  freq<-as.vector(freq)
+  DF <- data.frame(Frequency = freq,
+                  Values = gl(length1, 1, labels = label1))
+
+  head <- Items2$Wording[Items2$ColName==stri]
+  head<- as.character(head)
+  head <-paste0(strwrap(head, width=40), collapse="\n")
+  
+  gp<-ggplot(DF, aes(x = Values, y = Frequency)) +
+  xlab("") + ylab("Frequency") +
+  expand_limits(y = c(0, max(DF$Frequency)*1.1)) + 
+  geom_bar(stat = "identity", fill = "#56B4E9") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
+  geom_text(aes(label = sprintf("%.2f%%", Frequency/sum(Frequency) * 100)), 
+            vjust = -.5) +
+  labs(title=head)
+  print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
+}
+
+sHIST <- function(v) {
+
+  m=round(mean(v, na.rm = TRUE),2)
+  m=toString(m)
+  sdt=round(sd(v, na.rm = TRUE),2)
+  sdt = toString(sdt)
+  mands=paste(c(m,sdt),collapse = "/")
+  ad <- paste(c("M(SD)", mands), collapse = "=")
+  
+  med = round(median(v, na.rm = TRUE),2)
+  med = toString(med)
+  ad2 <- paste(c("Med", med), collapse = "=")
+  
+  stri=deparse(substitute(v))
+  head <- Items2$Wording[Items2$ColName==stri]
+  head<- as.character(head)
+  head <-paste0(strwrap(c(head,ad,ad2), width=40), collapse="\n")
+  
+  vec<-0:100
+  toString(vec)
+  vec<-as.character(vec)
+  vec<-as.list(strsplit(vec, ","))
+  vec<-unlist(vec)
+  length1=length(vec)
+  
+  freq<-table(factor(v, levels = 0:100))
+  freq<-as.vector(freq)
+  DF <- data.frame(Frequency = freq,
+                  Values = vec)
+  
+  gp<-ggplot(Data2, aes(x = v)) +
+     geom_histogram(breaks=seq(0, 100, by = 10),
+                 col="#000000",
+                 fill="#56B4E9") +
+  labs(title = head) +
+  labs(x="0-100%", y="Frequency")
+
+  print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
+
+}
+
+
+
+GN<-sGGbar(G.N)
+
+```
+
+##For Midterm 2, how did you form your group?
+```{r, echo=FALSE, warning=FALSE}
+GFORM<-sGGbar(GForm)
+
+```
+
+##Before this exam, how much did you and your group discuss HOW you would work together: make decisions, resolve conflicts, etc.
+```{r, echo=FALSE, warning=FALSE}
+discuss<-sGGbar(Discuss)
+```
+
+##Fill in the boxes with the percentage of time for how you studied for this exam.
+(Answers should sum to 100%)
+```{r, echo=FALSE, warning=FALSE}
+Study1<-sHIST(Study_1)
+Study2<-sHIST(Study_2)
+Study3<-sHIST(Study_3)
+Study4<-sHIST(Study_4)
+```
+
+
+##During the group exam, how much did each member participate in the work? 
+(Answers should sum to 100%)
+```{r, echo=FALSE, warning=FALSE}
+P1<-sHIST(Parti_1)
+P2<-sHIST(Parti_2)
+P3<-sHIST(Parti_3)
+
+P4<-sHIST(Parti_4)
+P5<-sHIST(Parti_5)
+```
+
+##How well do you know each person in your group? 
+(Please reference members in the same order as you did above.)
+```{r, echo=FALSE, warning=FALSE}
+K1<-sGGbar2(Know_1)
+K2<-sGGbar2(Know_2)
+K3<-sGGbar2(Know_3)
+```
+
+##How were group decisions made? 
+(Choices should sum to 100%)
+```{r, echo=FALSE, warning=FALSE}
+D1<-sHIST(Decide_1)
+D2<-sHIST(Decide_2)
+D3<-sHIST(Decide_3)
+d4<-sHIST(Decide_4)
+```
+
+##How was the pace of the group work together, for you?
+```{r, echo=FALSE, warning=FALSE}
+Pace<-Data2$Pace
+pace<-sGGbar(Pace)
+```
+
+
+##Please rate how true the following statements are about how your group worked together
+```{r, echo=FALSE, warning=FALSE}
+GE11<-sGGbar2(G.Exp1_1)
+GE12<-sGGbar2(G.Exp1_2)
+GE13<-sGGbar2(G.Exp1_3)
+GE21<-sGGbar2(G.Exp2_1)
+GE22<-sGGbar2(G.Exp2_2)
+GE23<-sGGbar2(G.Exp2_3)
+GE24<-sGGbar2(G.Exp2_4)
+GE25<-sGGbar2(G.Exp2_5)
+GE34<-sGGbar2(G.Exp3_4)
+GE35<-sGGbar2(G.Exp3_5)
+GE37<-sGGbar2(G.Exp3_7)
+GE38<-sGGbar2(G.Exp3_8)
+```
+
+##Was there one or more people in your group who you prefer not to work with again?
+```{r, echo=FALSE, warning=FALSE}
+NAG<-sGGbar(NotAgain)
+```
+
+
+##During this group exam, I felt comfortable sharing my answer with the group...
+```{r, echo=FALSE, warning=FALSE}
+S2<-sGGbar2(Share_2)
+S3<-sGGbar2(Share_3)
+S6<-sGGbar2(Share_6)
+S4<-sGGbar2(Share_4)
+```
+
+##For which midterm (MT) was the experience of working with your group better?
+```{r, echo=FALSE, warning=FALSE}
+better<-sGGbar2(Better_3)
+```
+
+##Did you change how you prepared for or participated in THIS GROUP EXAM as compared to the group exam in MIDTERM 1?
+```{r, echo=FALSE, warning=FALSE}
+change<-sGGbar(Change)
+```
+
+
+##I see myself as . . .
+```{r, echo=FALSE, warning=FALSE}
+T1<-sGGbar2(TIPI_1)
+T2<-sGGbar2(TIPI_2)
+T3<-sGGbar2(TIPI_3)
+T4<-sGGbar2(TIPI_4)
+T5<-sGGbar2(TIPI_5)
+```
+
+##Click to write the question text
+```{r, echo=FALSE, warning=FALSE}
+q1<-sGGbar2(Q66_1)
+q2<-sGGbar2(Q66_2)
+q3<-sGGbar2(Q66_3)
+q4<-sGGbar2(Q66_4)
+q5<-sGGbar2(Q66_5)
+```

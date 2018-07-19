@@ -13,7 +13,7 @@ output:
 
 
 Data2 <- read.csv("Data2.csv")
-Items2<- read.csv("Items2.csv")
+Items2<- read.csv("ItemsID2.csv")
 
 library(stringr)
 library(ggplot2)
@@ -38,17 +38,11 @@ sGGbar <- function(v) {
      }
   }
   
-  argm =as.numeric(label1)
-  
-  if(anyNA(argm)){
     argm = Items2$Values[Items2$ColName==stri]
     argm = as.character(argm)
     argm<-as.list(strsplit(argm, ","))
     argm<-unlist(argm)
     argm = as.numeric(argm)
-  }
-  
-  
   
   
   freq<-table(factor(v, levels = min(argm):max(argm)))

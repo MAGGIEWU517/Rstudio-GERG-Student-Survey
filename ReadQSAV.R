@@ -107,7 +107,5 @@ ItemsID2 <- MydataID2[[2]]
 write.csv(DataID2, file = "DataID2.csv")
 write.csv(ItemsID2, file = "ItemsID2.csv")
 
-GroupSizes <- table(factor(DataID2$G.N, levels = 2:5))
-
 
 

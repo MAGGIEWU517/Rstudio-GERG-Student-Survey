@@ -276,3 +276,14 @@ Future.Diff (Mid-Final) is a variables that look at how many students don't want
 ```{r, echo=FALSE, warning=FALSE}
 Fd<-sHIST2(Data31,Future_diff,"Composite Variable: Future Difference",1,0.1)
 ```
+
+
+##Personality 
+5 personality score is calculated in this way: TIPI.E1 <- (TIPI_1 + (8-Q66_1)) / 2. This 5 composite variables are personality scores.
+```{r, echo=FALSE, warning=FALSE}
+TE1<-sHIST2(DataID3,TIPI.E1,"Composite Variable: Extraverted, enthusiastic. AND (Not)Reserved, quiet.",8,1)
+TE2<-sHIST2(DataID3,TIPI.E2,"Composite Variable: Critical, quarrelsome. AND (Not)Sympathetic, warm.",8,1)
+TE3<-sHIST2(DataID3,TIPI.E3,"Composite Variable: Dependable, self-disciplined. AND (Not)Disorganized, careless.",8,1)
+TE4<-sHIST2(DataID3,TIPI.E4,"Composite Variable: Anxious, easily upset. AND (Not)Calm, emotionally stable.",8,1)
+TE5<-sHIST2(DataID3,TIPI.E5,"Composite Variable: Open to new experiences, complex. AND (Not)Conventional, uncreative.",8,1)
+```

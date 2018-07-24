@@ -9,6 +9,7 @@ output:
 ```{r, echo=FALSE, warning=FALSE}
 library(stringr)
 library(ggplot2)
+library("Hmisc")
 
 Data1 <- read.csv("Data1.csv")
 Data2 <- read.csv("Data2.csv")
@@ -17,7 +18,7 @@ Items2 <- read.csv("ItemsID2.csv")
 Data31<-read.csv("Data31.csv")
 Data32<-read.csv("Data32.csv")
 DataID3<-read.csv("DataID3.csv")
-
+person <- read.csv("personality.csv")
 
 sGGbar <- function(d,v,it) {
   
@@ -189,7 +190,7 @@ sHIST2 <- function(d,v,h,xl,br) {
                  col="#000000",
                  fill="#56B4E9") +
   labs(title = head) +
-  labs(x=paste(c("0",xls),collapse = "-"), y="Frequency")
+  labs(x=paste(c("1",xls),collapse = "-"), y="Frequency")
 
   print(gp+theme(plot.title = element_text(size = rel(1.2), hjust = 0.5, face = "bold")))
   detach(d)
@@ -281,9 +282,15 @@ Fd<-sHIST2(Data31,Future_diff,"Composite Variable: Future Difference",1,0.1)
 ##Personality 
 5 personality score is calculated in this way: TIPI.E1 <- (TIPI_1 + (8-Q66_1)) / 2. This 5 composite variables are personality scores.
 ```{r, echo=FALSE, warning=FALSE}
-TE1<-sHIST2(DataID3,TIPI.E1,"Composite Variable: Extraverted, enthusiastic. AND (Not)Reserved, quiet.",8,1)
-TE2<-sHIST2(DataID3,TIPI.E2,"Composite Variable: Critical, quarrelsome. AND (Not)Sympathetic, warm.",8,1)
-TE3<-sHIST2(DataID3,TIPI.E3,"Composite Variable: Dependable, self-disciplined. AND (Not)Disorganized, careless.",8,1)
-TE4<-sHIST2(DataID3,TIPI.E4,"Composite Variable: Anxious, easily upset. AND (Not)Calm, emotionally stable.",8,1)
-TE5<-sHIST2(DataID3,TIPI.E5,"Composite Variable: Open to new experiences, complex. AND (Not)Conventional, uncreative.",8,1)
+TE1<-sHIST2(DataID3,TIPI.E,"Composite Variable: Extraversion",7,1)
+TE2<-sHIST2(DataID3,TIPI.A,"Composite Variable: Agreeableness",7,1)
+TE3<-sHIST2(DataID3,TIPI.C,"Composite Variable: Conscientiousness;",7,1)
+TE4<-sHIST2(DataID3,TIPI.S,"Composite Variable:  Emotional Stability",7,1)
+TE5<-sHIST2(DataID3,TIPI.O,"Composite Variable: Openness to Experiences",7,1)
+SDRP<-sHIST2(DataID3,DataID3$SDR,"Composite Variable:socially-desirable responding",7,0.1)
+```
+
+```{r, warning=FALSE}
+res <- rcorr(as.matrix(person))
+res
 ```
